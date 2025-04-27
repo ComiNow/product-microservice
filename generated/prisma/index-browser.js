@@ -117,13 +117,21 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.CategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  firstImage: 'firstImage',
+  secondImage: 'secondImage'
+};
+
 exports.Prisma.ProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  categoryId: 'categoryId',
   price: 'price',
-  available: 'available',
-  created_at: 'created_at',
-  updated_at: 'updated_at'
+  stock: 'stock',
+  image: 'image',
+  available: 'available'
 };
 
 exports.Prisma.SortOrder = {
@@ -136,8 +144,14 @@ exports.Prisma.QueryMode = {
   insensitive: 'insensitive'
 };
 
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+
 
 exports.Prisma.ModelName = {
+  Category: 'Category',
   Product: 'Product'
 };
 

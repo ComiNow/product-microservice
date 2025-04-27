@@ -1,26 +1,63 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { PrismaClient } from 'generated/prisma';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
-export class CategoryService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+export class CategoryService extends PrismaClient {
+  private readonly logger = new Logger('CategoryService');
+
+  onModuleInit() {
+    this.$connect();
+    this.logger.log('Database connected');
   }
 
-  findAll() {
-    return `This action returns all category`;
+  async create(createCategoryDto: CreateCategoryDto) {
+    try {
+      return await this.category.create({
+        data: createCategoryDto,
+      });
+    } catch (error) {
+      console.error('Error creating category:', error);
+      throw new RpcException('Failed to create category');
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findAll() {
+    return await this.category.findMany();
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async findOne(id: number) {
+    const category = await this.category.findUnique({
+      where: { id },
+    });
+
+    if (!category) {
+      throw new RpcException({
+        message: `Category with id #${id} not found`,
+        status: 404,
+      });
+    }
+
+    return category;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+    const { id: __, ...data } = updateCategoryDto;
+    const existingCategory = await this.findOne(id);
+
+    return this.category.update({
+      where: { id },
+      data: { ...data },
+    });
+  }
+  async remove(id: number) {
+    const category = await this.findOne(id);
+
+    return await this.category.update({
+      where: { id },
+      data: {},
+    });
   }
 }

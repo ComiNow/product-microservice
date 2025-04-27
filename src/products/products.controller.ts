@@ -4,6 +4,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { FilterProductDto } from 'src/common/dto/filter-product.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -22,7 +23,6 @@ export class ProductsController {
 
   @MessagePattern({ cmd: 'find_one_product' })
   findOne(@Payload('id', ParseIntPipe) id: number) {
-    // { id: 1
     return this.productsService.findOne(id);
   }
 
@@ -44,4 +44,12 @@ export class ProductsController {
   // validateProduct(@Payload() ids: number[]) {
   //   return this.productsService.validateProducts(ids);
   // }
+
+  @MessagePattern({ cmd: 'find_products_by_category' })
+  findByCategory(
+    @Payload() paginationDto: PaginationDto,
+    @Payload() filterProductDto: FilterProductDto,
+  ) {
+    return this.productsService.findByCategory(paginationDto, filterProductDto);
+  }
 }
