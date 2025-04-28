@@ -21,23 +21,28 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
         data: createProductDto,
       });
     } catch (error) {
-      console.error('Error creating product:', error);
       throw new RpcException('Failed to create product');
     }
   }
 
   async findAll(paginationDto: PaginationDto) {
-    const { page = 1, limit = 10 } = paginationDto;
+    const { page = 1, limit = 10, categoryId } = paginationDto;
 
     const totalPages = await this.product.count({
       where: { available: true },
     });
 
+    const where: any = { available: true };
+
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+
     const lastPage = Math.ceil(totalPages / limit);
 
     return {
       data: await this.product.findMany({
-        where: { available: true },
+        where,
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -119,37 +124,4 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
 
   //   return products;
   // }
-
-  async findByCategory(
-    paginationDto: PaginationDto,
-    filterProductDto: FilterProductDto,
-  ) {
-    const { page = 1, limit = 10 } = paginationDto;
-    const { categoryId } = filterProductDto;
-
-    const where: any = {};
-
-    if (categoryId) {
-      where.categoryId = categoryId;
-    }
-
-    const totalPages = await this.product.count({
-      where,
-    });
-
-    const lastPage = Math.ceil(totalPages / limit);
-
-    return {
-      data: await this.product.findMany({
-        where,
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      meta: {
-        totalPages,
-        page,
-        lastPage,
-      },
-    };
-  }
 }

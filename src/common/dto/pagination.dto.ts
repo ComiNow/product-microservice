@@ -11,4 +11,9 @@ export class PaginationDto {
   @IsPositive()
   @Type(() => Number)
   limit?: number = 10;
+
+  @IsOptional()
+  @IsPositive()
+  @Type(() => Number)
+  categoryId?: number;
 }
