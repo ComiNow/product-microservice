@@ -19,7 +19,6 @@ export class CategoryService extends PrismaClient {
         data: createCategoryDto,
       });
     } catch (error) {
-      console.error('Error creating category:', error);
       throw new RpcException('Failed to create category');
     }
   }
