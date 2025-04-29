@@ -11,14 +11,9 @@ Desarrollado con [NestJS](https://nestjs.com/), [Prisma](https://www.prisma.io/)
 
 ---
 
-## 🚀 Puesta en marcha (entorno de desarrollo)
+## 🚀 Entorno de desarrollo
 
 ### 1. Clonar el repositorio
-
-```bash
-git clone https://github.com/tu-usuario/product-microservice.git
-cd product-microservice
-```
 
 ### 2. Instalar dependencias
 
@@ -28,12 +23,7 @@ npm install
 
 ### 3. Configurar variables de entorno
 
-- Copia el archivo `.env.template` y renómbralo a `.env`
-- Rellena las variables necesarias (por ejemplo, `DATABASE_URL`)
-
-```bash
-cp .env.template .env
-```
+Copia el archivo `.env.template` y renómbralo a `.env`
 
 ### 4. Levantar la base de datos con Docker
 
@@ -55,18 +45,6 @@ npx prisma migrate dev
 ```bash
 npm run start:dev
 ```
-
----
-
-## 🧩 Comandos útiles
-
-| Comando                  | Descripción                       |
-| ------------------------ | --------------------------------- |
-| `npm run start:dev`      | Levanta el servidor en modo watch |
-| `npx prisma studio`      | Interfaz web para ver la BD       |
-| `npx prisma migrate dev` | Ejecuta migración de esquema      |
-| `npx prisma generate`    | Genera el cliente de Prisma       |
-| `docker-compose up -d`   | Levanta base de datos             |
 
 ---
 
@@ -104,3 +82,7 @@ src/
 - PostgreSQL
 - Docker Compose
 - NATS
+
+## 📄 Licencia
+
+Este proyecto es desarrollado por el equipo **CoffeeNow** ☕
