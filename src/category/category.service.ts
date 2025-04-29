@@ -13,14 +13,10 @@ export class CategoryService extends PrismaClient {
     this.logger.log('Database connected');
   }
 
-  async create(createCategoryDto: CreateCategoryDto) {
-    try {
-      return await this.category.create({
-        data: createCategoryDto,
-      });
-    } catch (error) {
-      throw new RpcException('Failed to create category');
-    }
+  create(createCategoryDto: CreateCategoryDto) {
+    return this.category.create({
+      data: createCategoryDto,
+    });
   }
 
   async findAll() {

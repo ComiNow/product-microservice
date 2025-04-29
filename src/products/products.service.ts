@@ -15,14 +15,10 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     this.logger.log('Database connected');
   }
 
-  async create(createProductDto: CreateProductDto) {
-    try {
-      return await this.product.create({
-        data: createProductDto,
-      });
-    } catch (error) {
-      throw new RpcException('Failed to create product');
-    }
+  create(createProductDto: CreateProductDto) {
+    return this.product.create({
+      data: createProductDto,
+    });
   }
 
   async findAll(paginationDto: PaginationDto) {

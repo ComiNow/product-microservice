@@ -7,11 +7,10 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) { }
+  constructor(private readonly productsService: ProductsService) {}
 
   @MessagePattern({ cmd: 'create_product' })
   create(@Payload() createProductDto: CreateProductDto) {
-    console.log('Received create_product with data:', createProductDto);
     return this.productsService.create(createProductDto);
   }
 
