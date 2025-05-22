@@ -12,6 +12,7 @@ async function main() {
       transport: Transport.NATS,
       options: {
         servers: envs.natsServers,
+        maxPacketSize: 10 * 1024 * 1024,
       },
     },
   );
@@ -19,6 +20,7 @@ async function main() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
   await app.listen();

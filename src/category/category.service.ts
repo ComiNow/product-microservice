@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, HttpStatus } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaClient } from 'generated/prisma';
@@ -13,45 +13,106 @@ export class CategoryService extends PrismaClient {
     this.logger.log('Database connected');
   }
 
-  create(createCategoryDto: CreateCategoryDto) {
-    return this.category.create({
-      data: createCategoryDto,
-    });
+  async create(createCategoryDto: CreateCategoryDto) {
+    try {
+      return await this.category.create({
+        data: createCategoryDto,
+      });
+    } catch (error) {
+      this.logger.error(`Error creating category: ${error.message}`);
+      throw new RpcException({
+        message: `Error creating category: ${error.message}`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
   }
 
   async findAll() {
-    return await this.category.findMany();
+    try {
+      return await this.category.findMany();
+    } catch (error) {
+      this.logger.error(`Error finding categories: ${error.message}`);
+      throw new RpcException({
+        message: `Error finding categories: ${error.message}`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
   }
 
   async findOne(id: number) {
-    const category = await this.category.findUnique({
-      where: { id },
-    });
+    try {
+      const category = await this.category.findUnique({
+        where: { id },
+        include: {
+          products: true,
+        },
+      });
 
-    if (!category) {
+      if (!category) {
+        throw new RpcException({
+          message: `Category with id #${id} not found`,
+          status: HttpStatus.NOT_FOUND,
+        });
+      }
+
+      return category;
+    } catch (error) {
+      if (error instanceof RpcException) throw error;
+
+      this.logger.error(`Error finding category: ${error.message}`);
       throw new RpcException({
-        message: `Category with id #${id} not found`,
-        status: 404,
+        message: `Error finding category: ${error.message}`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }
-
-    return category;
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    const { id: __, ...data } = updateCategoryDto;
-    const existingCategory = await this.findOne(id);
+    try {
+      const { id: __, ...data } = updateCategoryDto;
+      await this.findOne(id);
 
-    return this.category.update({
-      where: { id },
-      data: { ...data },
-    });
+      return await this.category.update({
+        where: { id },
+        data,
+      });
+    } catch (error) {
+      if (error instanceof RpcException) throw error;
+
+      this.logger.error(`Error updating category: ${error.message}`);
+      throw new RpcException({
+        message: `Error updating category: ${error.message}`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
   }
-  async remove(id: number) {
-    const category = await this.findOne(id);
 
-    return this.category.delete({
-      where: { id },
-    });
+  async remove(id: number) {
+    try {
+      await this.findOne(id);
+
+      const productsCount = await this.product.count({
+        where: { categoryId: id },
+      });
+
+      if (productsCount > 0) {
+        throw new RpcException({
+          message: `Cannot delete category with associated products`,
+          status: HttpStatus.BAD_REQUEST,
+        });
+      }
+
+      return await this.category.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (error instanceof RpcException) throw error;
+
+      this.logger.error(`Error removing category: ${error.message}`);
+      throw new RpcException({
+        message: `Error removing category: ${error.message}`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
   }
 }

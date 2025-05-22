@@ -1,11 +1,12 @@
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsNumber,
   IsOptional,
   IsPositive,
   IsString,
-  Min,
   IsUrl,
+  Min,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -29,7 +30,7 @@ export class CreateProductDto {
   public categoryId?: number;
 
   @IsOptional()
-  @IsString()
-  @IsUrl()
-  public image?: string;
+  @IsArray()
+  @IsUrl({}, { each: true })
+  public image?: string[];
 }
