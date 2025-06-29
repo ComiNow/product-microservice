@@ -5,6 +5,7 @@ export class Category {
   name: string;
   firstImage?: string;
   secondImage?: string;
+  available: boolean;
 
   products?: Product[];
 }

@@ -32,4 +32,14 @@ export class CategoryController {
   remove(@Payload('id') id: number) {
     return this.categoryService.remove(id);
   }
+
+  @MessagePattern({ cmd: 'find_all_categories_including_deleted' })
+  findAllIncludingDeleted() {
+    return this.categoryService.findAllIncludingDeleted();
+  }
+
+  @MessagePattern({ cmd: 'restore_category' })
+  restore(@Payload('id') id: number) {
+    return this.categoryService.restore(id);
+  }
 }

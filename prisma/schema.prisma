@@ -19,6 +19,7 @@ model Category {
   name         String    @db.VarChar(60)
   firstImage   String?   @db.VarChar(300)
   secondImage  String?   @db.VarChar(300)
+  available    Boolean   @default(true)
 
   products     Product[]
 
