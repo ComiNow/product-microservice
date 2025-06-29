@@ -1,3 +1,4 @@
+// filepath: product-microservice/src/products/products.service.ts
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -188,6 +189,55 @@ export class ProductsService extends PrismaClient {
       this.logger.error(`Error validating products: ${error.message}`);
       throw new RpcException({
         message: `Error validating products: ${error.message}`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  async getAvailableProductsByIds(ids: number[]) {
+    try {
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        this.logger.warn('Invalid or empty product IDs array received');
+        return [];
+      }
+
+      this.logger.log(
+        `Getting available products with IDs: [${ids.join(', ')}]`,
+      );
+
+      // Eliminar duplicados y asegurar que sean números
+      const uniqueIds = Array.from(new Set(ids)).map((id) => Number(id));
+
+      const products = await this.product.findMany({
+        where: {
+          id: { in: uniqueIds },
+          available: true,
+        },
+        include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      });
+
+      this.logger.log(
+        `Found ${products.length} available products out of ${uniqueIds.length} requested`,
+      );
+
+      // Formato de respuesta consistente con el resto de la aplicación
+      return products.map((product) => ({
+        ...product,
+        image: product.image ? [product.image] : [],
+      }));
+    } catch (error) {
+      this.logger.error(
+        `Error getting available products by IDs: ${error.message}`,
+      );
+      throw new RpcException({
+        message: `Error getting available products by IDs: ${error.message}`,
         status: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }

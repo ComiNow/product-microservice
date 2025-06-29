@@ -38,4 +38,9 @@ export class ProductsController {
   validateProduct(@Payload() ids: number[]) {
     return this.productsService.validateProducts(ids);
   }
+
+  @MessagePattern({ cmd: 'get_available_products_by_ids' })
+  getAvailableProductsByIds(@Payload() productIds: number[]) {
+    return this.productsService.getAvailableProductsByIds(productIds);
+  }
 }
