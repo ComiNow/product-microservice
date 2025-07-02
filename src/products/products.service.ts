@@ -1,4 +1,3 @@
-// filepath: product-microservice/src/products/products.service.ts
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -205,7 +204,6 @@ export class ProductsService extends PrismaClient {
         `Getting available products with IDs: [${ids.join(', ')}]`,
       );
 
-      // Eliminar duplicados y asegurar que sean números
       const uniqueIds = Array.from(new Set(ids)).map((id) => Number(id));
 
       const products = await this.product.findMany({
@@ -226,8 +224,6 @@ export class ProductsService extends PrismaClient {
       this.logger.log(
         `Found ${products.length} available products out of ${uniqueIds.length} requested`,
       );
-
-      // Formato de respuesta consistente con el resto de la aplicación
       return products.map((product) => ({
         ...product,
         image: product.image ? [product.image] : [],
@@ -238,6 +234,48 @@ export class ProductsService extends PrismaClient {
       );
       throw new RpcException({
         message: `Error getting available products by IDs: ${error.message}`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  async getProductsByIds(ids: number[]) {
+    try {
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        this.logger.warn('Invalid or empty product IDs array received');
+        return [];
+      }
+
+      this.logger.log(`Getting products with IDs: [${ids.join(', ')}]`);
+
+      const uniqueIds = Array.from(new Set(ids)).map((id) => Number(id));
+
+      const products = await this.product.findMany({
+        where: {
+          id: { in: uniqueIds },
+          available: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          image: true,
+          available: true,
+          categoryId: true,
+        },
+      });
+
+      this.logger.log(
+        `Found ${products.length} products out of ${uniqueIds.length} requested`,
+      );
+      return products.map((product) => ({
+        ...product,
+        image: product.image ? [product.image] : [],
+      }));
+    } catch (error) {
+      this.logger.error(`Error getting products by IDs: ${error.message}`);
+      throw new RpcException({
+        message: `Error getting products by IDs: ${error.message}`,
         status: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }

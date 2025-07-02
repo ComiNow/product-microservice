@@ -43,4 +43,9 @@ export class ProductsController {
   getAvailableProductsByIds(@Payload() productIds: number[]) {
     return this.productsService.getAvailableProductsByIds(productIds);
   }
+
+  @MessagePattern({ cmd: 'get_products_by_ids' })
+  getProductsByIds(@Payload() productIds: number[]) {
+    return this.productsService.getProductsByIds(productIds);
+  }
 }
