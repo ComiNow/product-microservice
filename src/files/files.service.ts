@@ -25,13 +25,23 @@ export class FilesService {
         cloudinary.uploader.upload(fileBase64, { folder }, (error, result) => {
           if (error) {
             this.logger.error(`Error de Cloudinary: ${error.message}`);
-            reject(new Error(`Error de Cloudinary: ${error.message}`));
+            reject(
+              new RpcException({
+                message: `Error uploading file: ${error.message}`,
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+              }),
+            );
             return;
           }
 
           if (!result) {
             this.logger.error('Resultado de Cloudinary es undefined');
-            reject(new Error('Cloudinary result is undefined'));
+            reject(
+              new RpcException({
+                message: 'Cloudinary result is undefined',
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+              }),
+            );
             return;
           }
 

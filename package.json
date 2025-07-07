@@ -72,15 +72,42 @@
       "json",
       "ts"
     ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/",
+      "/coverage/",
+      "/.vscode/",
+      "/src/tracer.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/src/tracer.ts"
+    ],
     "rootDir": "src",
+    "modulePaths": [
+      "<rootDir>/src"
+    ],
+    "moduleNameMapper": {
+      "^generated/prisma$": "<rootDir>/__mocks__/prisma.ts",
+      "^src/(.*)$": "<rootDir>/$1"
+    },
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      ".+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "sourceMap": true
+          }
+        }
+      ]
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/test-setup.ts"
+    ]
   }
 }
