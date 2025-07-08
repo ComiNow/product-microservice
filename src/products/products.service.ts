@@ -1,20 +1,17 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PrismaClient } from 'generated/prisma';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { RpcException } from '@nestjs/microservices';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
-export class ProductsService extends PrismaClient {
+export class ProductsService {
   private readonly logger = new Logger('ProductService');
 
-  onModuleInit() {
-    this.$connect();
-    this.logger.log('Database connected');
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
-  create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto) {
     try {
       const imageUrl =
         Array.isArray(createProductDto.image) &&
@@ -22,7 +19,7 @@ export class ProductsService extends PrismaClient {
           ? createProductDto.image[0]
           : null;
 
-      return this.product.create({
+      return await this.prisma.product.create({
         data: {
           ...createProductDto,
           image: imageUrl,
@@ -44,10 +41,10 @@ export class ProductsService extends PrismaClient {
     if (categoryId) where.categoryId = categoryId;
 
     try {
-      const totalProducts = await this.product.count({ where });
+      const totalProducts = await this.prisma.product.count({ where });
       const lastPage = Math.ceil(totalProducts / limit);
 
-      const products = await this.product.findMany({
+      const products = await this.prisma.product.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
@@ -77,7 +74,7 @@ export class ProductsService extends PrismaClient {
 
   async findOne(id: number) {
     try {
-      const product = await this.product.findUnique({
+      const product = await this.prisma.product.findUnique({
         where: { id },
         select: {
           id: true,
@@ -126,7 +123,7 @@ export class ProductsService extends PrismaClient {
             : null;
       }
 
-      return this.product.update({
+      return this.prisma.product.update({
         where: { id },
         data: {
           ...data,
@@ -148,7 +145,7 @@ export class ProductsService extends PrismaClient {
     try {
       await this.findOne(id);
 
-      return this.product.update({
+      return this.prisma.product.update({
         where: { id },
         data: { available: false },
       });
@@ -167,7 +164,7 @@ export class ProductsService extends PrismaClient {
     try {
       ids = Array.from(new Set(ids));
 
-      const products = await this.product.findMany({
+      const products = await this.prisma.product.findMany({
         where: {
           id: { in: ids },
           available: true,
@@ -200,13 +197,9 @@ export class ProductsService extends PrismaClient {
         return [];
       }
 
-      this.logger.log(
-        `Getting available products with IDs: [${ids.join(', ')}]`,
-      );
-
       const uniqueIds = Array.from(new Set(ids)).map((id) => Number(id));
 
-      const products = await this.product.findMany({
+      const products = await this.prisma.product.findMany({
         where: {
           id: { in: uniqueIds },
           available: true,
@@ -221,9 +214,6 @@ export class ProductsService extends PrismaClient {
         },
       });
 
-      this.logger.log(
-        `Found ${products.length} available products out of ${uniqueIds.length} requested`,
-      );
       return products.map((product) => ({
         ...product,
         image: product.image ? [product.image] : [],
@@ -246,11 +236,9 @@ export class ProductsService extends PrismaClient {
         return [];
       }
 
-      this.logger.log(`Getting products with IDs: [${ids.join(', ')}]`);
-
       const uniqueIds = Array.from(new Set(ids)).map((id) => Number(id));
 
-      const products = await this.product.findMany({
+      const products = await this.prisma.product.findMany({
         where: {
           id: { in: uniqueIds },
           available: true,
@@ -265,9 +253,6 @@ export class ProductsService extends PrismaClient {
         },
       });
 
-      this.logger.log(
-        `Found ${products.length} products out of ${uniqueIds.length} requested`,
-      );
       return products.map((product) => ({
         ...product,
         image: product.image ? [product.image] : [],

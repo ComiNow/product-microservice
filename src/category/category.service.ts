@@ -1,21 +1,18 @@
 import { Injectable, Logger, HttpStatus } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { PrismaClient } from 'generated/prisma';
 import { RpcException } from '@nestjs/microservices';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
-export class CategoryService extends PrismaClient {
+export class CategoryService {
   private readonly logger = new Logger('CategoryService');
 
-  onModuleInit() {
-    this.$connect();
-    this.logger.log('Database connected');
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
     try {
-      return await this.category.create({
+      return await this.prisma.category.create({
         data: createCategoryDto,
       });
     } catch (error) {
@@ -29,12 +26,11 @@ export class CategoryService extends PrismaClient {
 
   async findAll() {
     try {
-      // Solo devolver categorías disponibles
-      return await this.category.findMany({
+      return await this.prisma.category.findMany({
         where: { available: true },
         include: {
           products: {
-            where: { available: true }, // Solo productos disponibles
+            where: { available: true },
           },
         },
       });
@@ -49,14 +45,14 @@ export class CategoryService extends PrismaClient {
 
   async findOne(id: number) {
     try {
-      const category = await this.category.findUnique({
+      const category = await this.prisma.category.findUnique({
         where: {
           id,
-          available: true, // Solo categorías disponibles
+          available: true,
         },
         include: {
           products: {
-            where: { available: true }, // Solo productos disponibles
+            where: { available: true },
           },
         },
       });
@@ -85,7 +81,7 @@ export class CategoryService extends PrismaClient {
       const { id: __, ...data } = updateCategoryDto;
       await this.findOne(id);
 
-      return await this.category.update({
+      return await this.prisma.category.update({
         where: { id },
         data,
       });
@@ -102,11 +98,9 @@ export class CategoryService extends PrismaClient {
 
   async remove(id: number) {
     try {
-      // Verificar que la categoría existe y está disponible
       await this.findOne(id);
 
-      // Contar productos disponibles que usan esta categoría
-      const availableProductsCount = await this.product.count({
+      const availableProductsCount = await this.prisma.product.count({
         where: {
           categoryId: id,
           available: true,
@@ -120,8 +114,7 @@ export class CategoryService extends PrismaClient {
         });
       }
 
-      // Borrado lógico: marcar como no disponible
-      const deletedCategory = await this.category.update({
+      const deletedCategory = await this.prisma.category.update({
         where: { id },
         data: { available: false },
       });
@@ -142,10 +135,9 @@ export class CategoryService extends PrismaClient {
     }
   }
 
-  // Método adicional para obtener todas las categorías (incluyendo no disponibles) - para uso administrativo
   async findAllIncludingDeleted() {
     try {
-      return await this.category.findMany({
+      return await this.prisma.category.findMany({
         include: {
           products: true,
         },
@@ -159,10 +151,9 @@ export class CategoryService extends PrismaClient {
     }
   }
 
-  // Método para restaurar una categoría eliminada lógicamente
   async restore(id: number) {
     try {
-      const category = await this.category.findUnique({
+      const category = await this.prisma.category.findUnique({
         where: { id },
       });
 
@@ -180,7 +171,7 @@ export class CategoryService extends PrismaClient {
         });
       }
 
-      const restoredCategory = await this.category.update({
+      const restoredCategory = await this.prisma.category.update({
         where: { id },
         data: { available: true },
       });

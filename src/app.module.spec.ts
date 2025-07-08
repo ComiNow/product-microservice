@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ProductsModule } from './products/products.module';
 import { CategoryModule } from './category/category.module';
 import { FilesModule } from './files/files.module';
+import { PrismaService } from '../prisma/prisma.service';
 
 describe('AppModule', () => {
   let module: TestingModule;
@@ -10,7 +11,10 @@ describe('AppModule', () => {
   beforeEach(async () => {
     module = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(PrismaService)
+      .useValue({}) // Provee un mock vacío para PrismaService
+      .compile();
   });
 
   it('should be defined', () => {

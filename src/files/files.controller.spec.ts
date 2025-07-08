@@ -51,6 +51,27 @@ describe('FilesController', () => {
         'coffee-now/products',
       );
     });
+
+    it('should handle errors and log them', async () => {
+      const fileData = {
+        originalname: 'test.jpg',
+        mimetype: 'image/jpeg',
+        size: 1000,
+        buffer: Buffer.from('test').toString('base64'),
+      };
+
+      const error = new Error('Upload failed');
+      (service.uploadFile as jest.Mock).mockRejectedValue(error);
+
+      const loggerSpy = jest.spyOn(controller['logger'], 'error');
+
+      await expect(controller.uploadProductImage(fileData)).rejects.toThrow(
+        error,
+      );
+      expect(loggerSpy).toHaveBeenCalledWith(
+        'Error en uploadProductImage: Upload failed',
+      );
+    });
   });
 
   describe('uploadCategoryImage', () => {
@@ -106,7 +127,7 @@ describe('FilesController', () => {
       );
     });
 
-    it('should handle other type as second', async () => {
+    it('should upload a category image for other type as second', async () => {
       const data = {
         file: {
           originalname: 'test.jpg',
@@ -126,6 +147,28 @@ describe('FilesController', () => {
       expect(service.uploadFile).toHaveBeenCalledWith(
         expect.any(Object),
         'coffee-now/categories/second',
+      );
+    });
+
+    it('should handle errors and log them', async () => {
+      const data = {
+        file: {
+          originalname: 'test.jpg',
+          mimetype: 'image/jpeg',
+          size: 1000,
+          buffer: Buffer.from('test').toString('base64'),
+        },
+        type: 'first',
+      };
+
+      const error = new Error('Upload failed');
+      (service.uploadFile as jest.Mock).mockRejectedValue(error);
+
+      const loggerSpy = jest.spyOn(controller['logger'], 'error');
+
+      await expect(controller.uploadCategoryImage(data)).rejects.toThrow(error);
+      expect(loggerSpy).toHaveBeenCalledWith(
+        'Error en uploadCategoryImage: Upload failed',
       );
     });
   });

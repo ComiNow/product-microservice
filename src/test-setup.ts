@@ -1,23 +1,4 @@
-jest.mock('generated/prisma', () => ({
-  PrismaClient: jest.fn().mockImplementation(() => ({
-    product: {
-      create: jest.fn(),
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-      update: jest.fn(),
-      count: jest.fn(),
-    },
-    category: {
-      create: jest.fn(),
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-      update: jest.fn(),
-    },
-    $connect: jest.fn(),
-  })),
-}));
-
-// Mock de cloudinary
+// Mock de cloudinary para todos los tests
 jest.mock('cloudinary', () => ({
   v2: {
     uploader: {
@@ -26,3 +7,5 @@ jest.mock('cloudinary', () => ({
     config: jest.fn(),
   },
 }));
+
+// No mockear PrismaClient aquí, dejemos que cada test lo maneje individualmente
