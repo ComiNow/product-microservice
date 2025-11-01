@@ -1,0 +1,7 @@
+organization=udea-proyecto-integrador-1
+projectKey=udea-proyecto-integrador-1_product-microservice
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.65318
+dashboardUrl=https://sonarcloud.io/dashboard?id=udea-proyecto-integrador-1_product-microservice
+ceTaskId=AZfr0aE62Tggl3470KF-
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZfr0aE62Tggl3470KF-
