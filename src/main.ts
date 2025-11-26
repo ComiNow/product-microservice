@@ -13,6 +13,7 @@ async function main() {
       options: {
         servers: envs.natsServers,
         maxPacketSize: 10 * 1024 * 1024,
+        queue: 'products-service',
       },
     },
   );
